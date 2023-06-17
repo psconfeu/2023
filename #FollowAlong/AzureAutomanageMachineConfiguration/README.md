@@ -1,7 +1,7 @@
 # Azure Automanage Machine Configuration for large environments
 
 Jan-Hendrik PETERS
-Raimund ANDREE
+Raimund ANDRÈE
 
 You are on the verge of onboarding your on-premises systems to Azure Arc and plan to manage them using Azure Automanage Machine Configuration?
 Or do you already have everything set up, but want an overview of what is possible beyond pre-made Machine Configuration templates?
@@ -12,11 +12,12 @@ You are invited to follow along in this session to create and publish configurat
 
 ## Requirements to follow along without deploying anything
 
-This is the basic setup which allows you to at least try everything locally
+This is the basic setup which allows you to at least try everything locally.
 
 - Install at least PowerShell 7.3.4
 - Install [Visual Studio Code](https://code.visualstudio.com) or an alternative, capable editor
   - Recommended extensions: PowerShell, YAML (Red Hat)
+- Install [Git](https://git-scm.org)
 - If, and only if, you do not want to use Azure Repos later on (see below), please clone `https://github.com/dsccommunity/DscWorkshop.git` in a folder of your choice. For example:
   ```powershell
     mkdir ~/repos
@@ -24,6 +25,8 @@ This is the basic setup which allows you to at least try everything locally
   ```
 
 ## Requirements to follow along without virtual machines
+
+This adds all the build automation on Azure DevOps if you want, but does not assign policies to machines.
 
 - Everything from [Basic requirements](./README.md#Requirements-to-follow-along-without-deploying-anything)
 - Access to an Azure subscription
@@ -41,6 +44,9 @@ This is the basic setup which allows you to at least try everything locally
 
 ## Requirements to fully follow along (including deploying virtual machines)
 
+This spins up sample machines using AutomatedLab, the world's leading lab automation tool, to
+manage using Azure. Machines are deployed to Azure.
+
 - Everything from [advanced requirements](./README.md#Requirements-to-follow-along-without-virtual-machines)
 - Install AutomatedLab from either the gallery or <https://github.com/automatedlab/automatedlab/releases>
 - In an administrative PowerShell 7, run: `Install-LabAzureRequiredModule`
@@ -52,6 +58,9 @@ This is the basic setup which allows you to at least try everything locally
 - Grab a drink, wait for approximately 30 minutes, and then run: `& "./Lab Guest Configuration/20 Azure Guest Configuration Lab Customizations.ps1"`
 
 ## Requirements to fully follow along (existing virtual machines)
+
+You do you! If you have machines in Arc that you would like to manage, you will need to adapt
+the configuration data, but you're probably advanced enough.
 
 - Everything from [advanced requirements](./README.md#Requirements-to-follow-along-without-virtual-machines)
 - VM(s) to manage, either Arc or Azure VMs. You will need to adapt your configuration data.
