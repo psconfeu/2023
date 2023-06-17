@@ -55,6 +55,9 @@ manage using Azure. Machines are deployed to Azure.
   - `Set-AzContext -Subscription NAMEOFYOURSUBSCRIPTION`
 - In an administrative PowerShell 7 located in your cloned repo's root directory, run: `& "./Lab Guest Configuration/10 Azure Guest Configuration Lab.ps1"`
   >Hint: The default region is set to West Europe. Feel free to change this to another supported region display name using the script's parameters.
+- If the deployment fails during the validation because a SKU is not available, have a look at the available VM sizes!  
+    Please check if a size is generally usable with Standard managed SSDs in one single Availablity Set behind a load balancer first.  
+    `Get-LabAzureAvailableRoleSize -DisplayName 'West Europe' | where NumberOfCores -le 4 | ft Name, NumberOfCores`
 - Grab a drink, wait for approximately 30 minutes, and then run: `& "./Lab Guest Configuration/20 Azure Guest Configuration Lab Customizations.ps1"`
 
 ## Requirements to fully follow along (existing virtual machines)
