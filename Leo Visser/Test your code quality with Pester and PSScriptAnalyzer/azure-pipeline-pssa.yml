@@ -1,0 +1,22 @@
+trigger:
+- none
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+  - task: PowerShell@2
+    inputs:
+      filePath: 'test.ps1'
+      arguments: "-Type advanced -OutputResults"
+      pwsh: true
+      failOnStderr: false
+    continueOnError: true
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'NUnit'
+      testResultsFiles: 'pssa.testresults.xml'
+      mergeTestResults: true
+      failTaskOnFailedTests: true
+      testRunTitle: 'PSScriptAnalyzer tests'
+    condition: in(variables['Agent.JobStatus'], 'Succeeded', 'SucceededWithIssues', 'Failed')
