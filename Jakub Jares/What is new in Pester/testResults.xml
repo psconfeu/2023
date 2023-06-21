@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-run id="0" name="Pester" fullname="Pester" testcasecount="2" result="Failed" total="2" passed="0" failed="2" inconclusive="0" skipped="0" warnings="0" start-time="2023-06-19T12:12:02.7872865Z" end-time="2023-06-19T12:12:02.9387492Z" duration="0.1515" asserts="2" random-seed="902022067">
+  <filter />
+  <test-suite type="Assembly" id="1-1000" name="086c6a0e-ec2b-4d49-877b-8c58b103f470" fullname="&lt;ScriptBlock&gt;:1" runstate="Runnable" result="Failed" site="Child" start-time="2023-06-19T12:12:02.8750247Z" end-time="2023-06-19T12:12:03.0264874Z" duration="0.1515" testcasecount="2" total="2" passed="0" failed="2" inconclusive="0" warnings="0" skipped="0" asserts="2">
+    <environment clr-version="7.0.5" machine-name="NLAPTOP" framework-version="5.5.0" os-version="10.0.22621" cwd="X:\" user="jajares" user-domain="EUROPE" platform="Microsoft Windows 11 Enterprise|C:\WINDOWS|\Device\Harddisk0\Partition3" culture="en-150" uiculture="en-US" os-architecture="x64" />
+    <test-suite type="TestFixture" id="1-1001" name="d" fullname="d" classname="d" runstate="Runnable" result="Failed" site="Child" start-time="2023-06-19T12:12:02.8813502Z" end-time="2023-06-19T12:12:02.9064332Z" duration="0.0251" testcasecount="2" total="2" passed="0" failed="2" inconclusive="0" warnings="0" skipped="0" asserts="2">
+      <properties>
+        <property name="_TYPE" value="Describe" />
+      </properties>
+      <test-suite type="ParameterizedMethod" id="1-1002" name="i" fullname="d.i" classname="d" runstate="Runnable" result="Failed" start-time="2023-06-19T12:12:02.8994728Z" end-time="2023-06-19T12:12:02.9216040Z" duration="0.0221" testcasecount="2" total="2" passed="0" failed="2" inconclusive="0" warnings="0" skipped="0" asserts="2">
+        <test-case id="1-1003" name="d.i(&quot;Jakub&quot;)" fullname="d.i(&quot;Jakub&quot;)" methodname="i" classname="d" runstate="Runnable" result="Failed" start-time="2023-06-19T12:12:02.8824482Z" end-time="2023-06-19T12:12:02.8994239Z" duration="0.017" seed="0" asserts="1">
+          <properties>
+            <property name="Name" value="Jakub" />
+          </properties>
+          <failure>
+            <message><![CDATA[Expected strings to be the same, but they were different.
+Expected length: 12
+Actual length:   5
+Strings differ at index 0.
+Expected: 'bravo-kernel'
+But was:  'Jakub'
+           ^]]></message>
+            <stack-trace><![CDATA[at $name | Should -Be "bravo-kernel", :7
+at <ScriptBlock>, <No file>:7]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1-1004" name="d.i(&quot;Frode&quot;)" fullname="d.i(&quot;Frode&quot;)" methodname="i" classname="d" runstate="Runnable" result="Failed" start-time="2023-06-19T12:12:02.8994728Z" end-time="2023-06-19T12:12:02.9046283Z" duration="0.0052" seed="0" asserts="1">
+          <properties>
+            <property name="Name" value="Frode" />
+          </properties>
+          <failure>
+            <message><![CDATA[Expected strings to be the same, but they were different.
+Expected length: 12
+Actual length:   5
+Strings differ at index 0.
+Expected: 'bravo-kernel'
+But was:  'Frode'
+           ^]]></message>
+            <stack-trace><![CDATA[at $name | Should -Be "bravo-kernel", :7
+at <ScriptBlock>, <No file>:7]]></stack-trace>
+          </failure>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
