@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "AutomationAccountName": {
+            "type": "string",
+            "defaultValue": "automationaccounttestdemo"
+        },
+        "RunbookName": {
+            "type": "string",
+            "defaultValue": "runbook1"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "Get-first-hour",
+            "location": "[resourceGroup().location]",
+            "kind": "AzurePowerShell",
+            "properties": {
+                "forceUpdateTag": "1",
+                "azPowerShellVersion": "6.6",
+                "scriptContent": "$DeploymentScriptOutputs['text'] = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date -Minute 0 -Second 0).AddHours(1), 'Europe/Amsterdam')",
+                "arguments": "",
+                "timeout": "PT1H",
+                "cleanupPreference": "Always",
+                "retentionInterval": "PT1H"
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/schedules",
+            "apiVersion": "2020-01-13-preview",
+            "name": "[concat(parameters('AutomationAccountName'), '/schedule1')]",
+            "dependsOn": [
+                "Get-first-hour"
+            ],
+            "properties": {
+                "startTime": "[reference('Get-first-hour').outputs.text]",
+                "expiryTime": "9999-12-31T23:59:59.9999999+00:00",
+                "interval": 1,
+                "frequency": "Hour",
+                "timeZone": "Europe/Amsterdam"
+            }
+        },
+        {
+            "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+            "apiVersion": "2020-01-13-preview",
+            "name": "[concat(parameters('AutomationAccountName'), '/', guid('jobSchedule1'))]",
+            "dependsOn": [
+                "schedule1"
+            ],
+            "properties": {
+                "runbook": {
+                    "name": "[parameters('RunbookName')]"
+                },
+                "schedule": {
+                    "name": "schedule1"
+                }
+            }
+        }
+    ]
+}
