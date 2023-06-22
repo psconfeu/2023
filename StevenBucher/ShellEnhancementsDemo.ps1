@@ -12,27 +12,27 @@ using namespace System.Management.Automation.Language
 # Enablding only history predictor
 Set-PSReadLineOption -PredictionSource History
 
-### History and Plugins
+## History and Plugins
 Set-PSReadLineOption -PredictionSource HistoryAndPlugin
 
-### Coloring Changes
+## Coloring Changes
 Set-PSReadLineOption -Colors @{ InLinePrediction = 'Green'} 
 Set-PSReadLineOption -Colors @{ InLinePrediction = "$([char]0x1b)[36;7;238m"}  
 Set-PSReadLineOption -Colors @{ InLinePrediction = 'Magenta'}
 
-### List View of Predictors (also binded to F2)
+## List View of Predictors (also binded to F2)
 Set-PSREadLineOption -PredictionViewStyle ListView
 
-### Completion Predictor 
+## Completion Predictor 
 Import-Module CompletionPredictor
 
-### Az Predictor Enablement
+## Az Predictor Enablement
 Import-Module Az.Tools.Predictor     # A.I trained model             
 Enable-AzPredictor
 Enable-AzPredictor -AllSession       # Keeping it presistent across sessions
 
 # Creating a predictor
-### See aka.ms/PSPredictorDoc
+## See aka.ms/PSPredictorDoc
 
 
 
@@ -47,15 +47,14 @@ Get-PSReadLineKeyHandler
 
 ## PSReadLineOptions
 
-Get-PSReadLineOptions
-
-# you can set differnet PSReadLine options via Set-PSReadLineOption
+Get-PSReadLineOptions # you can set differnet PSReadLine options via Set-PSReadLineOption
 
 # SampleProfile.ps1 example located in the PSReadLine module folder 
 # You can find location by using
 Get-Module PSReadLine -ListAvailable
 
 # Command Validation Handler
+## Documentation: https://learn.microsoft.com/en-us/powershell/module/psreadline/set-psreadlineoption?view=powershell-7.3#-commandvalidationhandler
 Set-PSReadLineOption -CommandValidationHandler {
     param([CommandAst]$CommandAst)
 
@@ -76,7 +75,7 @@ Set-PSReadLineOption -CommandValidationHandler {
     }
 }
 
-# This function validates and accepts after the enter key is pressed which runs the code in CommandValidationHandler
+# This function validates and accepts after the enter key is pressed which runs the code in CommandValidationHandler, it is required for the above code to work
 Set-PSReadLineKeyHandler -Chord Enter -Function ValidateAndAcceptLine
 
 
@@ -138,7 +137,7 @@ Set-PSReadLineKeyHandler -Key ')',']','}' `
 # Feedback Providers
 #--------------------------------------------------
 
-## Available from 7.4-preview.2 and up
+# Available from 7.4-preview.2 and up
 pwsh-preview -NoProfile
 Enable-ExperimentalFeature -Name PSCommandNotFoundSuggestion
 Enable-ExperimentalFeature -Name PSFeedbackProvider
