@@ -1,0 +1,21 @@
+name: Run my action
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/actions
+      id: dockeraction
+      with: 
+        who-to-greet: 'Bjompen'
+    - name: Read the output from docker
+      id: ReadOutput
+      run: |
+        Write-Output "time of run was ${{ steps.dockeraction.outputs.time }}"
+      shell: pwsh
+    

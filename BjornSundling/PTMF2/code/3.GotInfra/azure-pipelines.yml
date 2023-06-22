@@ -1,0 +1,196 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+resources:
+  repositories:
+    - repository: Code
+      type: git
+      name: PSConf2023-PTMF2/3.GotInfra.Function
+
+jobs:
+  # - job: Build
+  #   displayName: Build application
+  #   pool:
+  #     vmImage: windows-latest
+
+  #   steps:
+  #   - checkout: self
+  #     fetchDepth: 0
+      
+  #   - task: PowerShell@2
+  #     displayName: Scan for secrets
+  #     inputs:
+  #       targetType: 'inline'
+  #       script: |
+  #         Find-Module PSSecretScanner | Install-Module -Force
+  #         $r = Find-Secret -Path ./
+  #         if ($r.count -gt 0) {
+  #           $r
+  #           throw
+  #         }
+  #       failOnStderr: true
+  #       pwsh: true
+
+  #   - task: PowerShell@2
+  #     displayName: Run ScriptAnalyzer
+  #     inputs:
+  #       targetType: 'inline'
+  #       script: 'Invoke-ScriptAnalyzer -Path $(System.DefaultWorkingDirectory) -Recurse -Severity Error -EnableExit'
+  #       failOnStderr: true
+  #       pwsh: true
+
+  #   - task: PowerShell@2
+  #     displayName: Run Pester tests
+  #     inputs:
+  #       targetType: 'inline'
+  #       script: 'Invoke-Pester -Path $(System.DefaultWorkingDirectory) -CI -Output Detailed'
+  #       pwsh: true
+        
+  #   - task: PublishTestResults@2
+  #     displayName: Publish test results
+  #     condition: always()
+  #     inputs:
+  #       testResultsFormat: 'NUnit'
+  #       testResultsFiles: '**/test*.xml'
+  #       failTaskOnFailedTests: true
+
+  #   - task: PowerShell@2
+  #     displayName: Build 
+  #     inputs:
+  #       targetType: 'inline'
+  #       script: |
+  #         Install-Module InvokeBuild -Force
+  #         invoke-Build -File $(System.DefaultWorkingDirectory)/BasicFunction.Build.ps1
+  #       failOnStderr: true
+  #       pwsh: true
+
+  #   - task: PublishPipelineArtifact@1
+  #     displayName: Publish module to pipeline
+  #     inputs:
+  #       targetPath: '$(System.DefaultWorkingDirectory)/Bin'
+  #       artifact: 'Bin'
+  #       publishLocation: 'pipeline'
+
+  - job: IntegrationTest
+    displayName: 'Run integration tests in Azure Function'
+    pool: PSConfEUVMSS
+
+    steps:
+    - checkout: Code
+    - checkout: self
+
+    # - task: DownloadPipelineArtifact@1
+    #   displayName: 'Download module from build step'
+    #   inputs:
+    #     buildType: 'current'
+    #     artifactName: 'Bin'
+    #     targetPath: '$(System.DefaultWorkingDirectory)'
+    
+    - task: CmdLine@2
+      displayName: 'Install PowerShell'
+      inputs:
+        script: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https software-properties-common
+          wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb"
+          sudo dpkg -i packages-microsoft-prod.deb
+          sudo apt-get update
+          sudo apt-get install -y powershell
+    
+    - task: CmdLine@2
+      displayName: 'Install Bicep'
+      inputs:
+        script: |
+          curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+          chmod +x ./bicep
+          sudo mv ./bicep /usr/local/bin/bicep
+
+    - task: PowerShell@2
+      displayName: 'Copy bin folder to function'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Copy-Item -Path $(System.DefaultWorkingDirectory)/3.GotInfra/Bin/* -Destination $(System.DefaultWorkingDirectory)/3.GotInfra/functionSource/fruitTrigger/ -Recurse
+          
+    - task: PowerShell@2
+      displayName: 'Set up temporary Azure Function to run integration tests'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "$((Get-Date).ToLongTimeString()): Importing Modules"
+          Get-ChildItem $(System.DefaultWorkingDirectory)/3.GotInfra/DeploymentModules/ | ForEach-Object {Import-Module $_.FullName -Force}
+
+          Write-Host "$((Get-Date).ToLongTimeString()): Connecting to Azure"
+          Connect-AzAccount -Identity
+
+          $RGName = ((New-Guid).Guid -replace '-')
+          Write-Host "$((Get-Date).ToLongTimeString()): Create resource group $RGName"
+          $RG = New-AzResourceGroup -Name $RGName -Location 'westeurope'
+
+          Write-Host "$((Get-Date).ToLongTimeString()): Running bicep deploy"
+          $BicepDeploy = New-AzResourceGroupDeployment -Name 'deployAzureFunction' -ResourceGroupName $RGName -TemplateFile $(System.DefaultWorkingDirectory)/3.GotInfra.Function/FunctionBicep/AzureFunction.bicep -TemplateParameterObject @{
+              name = -join ($RGName[0..10])
+          }
+
+          Write-Host "$((Get-Date).ToLongTimeString()): Zipping and publishing webapp"
+          $zip = Compress-Archive -Path $(System.DefaultWorkingDirectory)/3.GotInfra/functionSource/* -DestinationPath $(System.DefaultWorkingDirectory)/3.GotInfra/myFunc.zip -PassThru
+          $WebApp = Publish-AzWebapp -ResourceGroupName $RGName -Name $BicepDeploy.Outputs['functionName'].value -ArchivePath $zip.FullName -Timeout 300000 -Verbose -Force 
+
+          Write-Host "$((Get-Date).ToLongTimeString()): Set pipeline variables"
+          Write-Host "##vso[task.setvariable variable=WebAppHostName;]$($WebApp.DefaultHostName)"
+          Write-Host "##vso[task.setvariable variable=RGName;]$RGName"
+        failOnStderr: true
+        pwsh: true
+
+    - task: PowerShell@2
+      displayName: 'run integration tests'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Find-Module Pester | Install-Module -Force
+          Write-Host "$((Get-Date).ToLongTimeString()): Sleeping for two minutes to allow funtion to start..."
+          Start-Sleep -Seconds 120
+
+          Write-Host "$((Get-Date).ToLongTimeString()): Running integration tests on 'https://$(WebAppHostName)/api/fruitTrigger'"
+
+          $PesterConfiguration = New-PesterConfiguration
+          $PesterConfiguration.Output.Verbosity = 'Detailed'
+          $container = New-PesterContainer -Path $(System.DefaultWorkingDirectory)/3.GotInfra/IntegrationTests.Tests.ps1 -Data @{
+            FunctionUrl = "https://$(WebAppHostName)/api/fruitTrigger"
+          }
+          $PesterConfiguration.Run.Container = $container
+          $PesterConfiguration.TestResult.Enabled = $true
+          Invoke-Pester -Configuration $PesterConfiguration 
+  
+    - task: PublishTestResults@2
+      displayName: Publish test results
+      condition: always()
+      inputs:
+        testResultsFormat: 'NUnit'
+        testResultsFiles: '**/test*.xml'
+        failTaskOnFailedTests: true
+  
+    - task: PowerShell@2
+      displayName: 'Remove temporary resources'
+      condition: always()
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Host "$((Get-Date).ToLongTimeString()): Importing Modules"
+          Get-ChildItem $(System.DefaultWorkingDirectory)/3.GotInfra/DeploymentModules/ | ForEach-Object {Import-Module $_.FullName -Force}
+          
+          Write-Host "$((Get-Date).ToLongTimeString()): Removing resources"
+          Remove-AzResourceGroup -Name $(RGName) -Force
+
+    - task: UniversalPackages@0
+      inputs:
+        command: 'publish'
+        publishDirectory: '$(System.DefaultWorkingDirectory)/3.GotInfra/myFunc.zip'
+        feedsToUsePublish: 'internal'
+        vstsFeedPublish: '36f940cd-ad42-4a80-9bdb-6a9f4535805e/1b091a33-ff45-43ad-bfdc-81d91af7fd7e'
+        vstsFeedPackagePublish: 'myzippackage'
+        versionOption: 'patch'

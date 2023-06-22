@@ -1,0 +1,51 @@
+name: "d445918237f54bee842280689eee98b2"
+
+description: "I made this!"
+
+branding:
+  icon: 'user-x'
+  color: 'purple'
+
+inputs:
+  Icons:
+    description: "Display icons?"
+    default: "false"
+
+outputs:
+  IconResult:
+    description: "Icons or Fruits"
+    value: ${{ steps.GetFruits.outputs.IconResult }}
+
+runs:
+  using: "composite"
+  steps: 
+    - shell: pwsh
+      id: GetFruits
+      run: |
+        Write-Output "::group::My Awesome Function!"
+        Write-Output "::notice File=MommaScript.ps1::Running my awesome function using runner file!"
+        Write-Output "::endgroup::"
+
+        $i = switch ('${{ inputs.Icons }}') {
+          'false' {$false}
+          Default {$true}
+        }
+
+        try {
+          Write-Output "::Group::Trying to run stuff"
+          $res = & $env:GITHUB_ACTION_PATH\MommaScript.ps1 -Icons:$i
+          
+          # Write to standard output
+          Write-Output "::notice::Result: $($res -join ',')"
+          Write-Output "::endgroup::"
+
+          # Set environment variables - works in the same job
+          "IconsOutput=$($res -join ',')" >> $env:GITHUB_ENV
+          
+          # Set output variables
+          "IconResult=$($res -join ',')" >> $env:GITHUB_OUTPUT
+        }
+        catch {
+          Write-Output "::error file=MommaScript.ps1::Failed to run MommaScript!"
+        }
+
