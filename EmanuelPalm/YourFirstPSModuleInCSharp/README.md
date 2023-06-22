@@ -10,6 +10,6 @@ We will use GitHub and git to create the project, and together write a simple Po
 
 By the end of the session we will have a fully working module with tests, ready to be shared with the community.
 
-## Prerequisites and Setup Information
+## Code, Slides, Prerequisites and Setup Information
 
 All information for participating in this session can be found at [the session repository](https://github.com/PalmEmanuel/YourFirstPSModuleInCSharp#follow-along-setup).
