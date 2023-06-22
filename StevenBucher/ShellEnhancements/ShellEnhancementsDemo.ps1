@@ -3,7 +3,7 @@ using namespace System.Management.Automation
 using namespace System.Management.Automation.Language
 
 # Shell enhancements
-
+# Steven Bucher - Product Manager for PowerShell
 
 #--------------------------------------------------
 # Predictors
