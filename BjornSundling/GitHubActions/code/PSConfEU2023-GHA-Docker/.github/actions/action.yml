@@ -1,0 +1,22 @@
+name: 'PSConf2023GHADocker'
+
+description: 'Greet someone'
+
+branding: 
+    icon: lock
+    color: red
+
+inputs:
+  who-to-greet: 
+    description: 'Who to greet'
+    default: ''
+
+outputs:
+  time:
+    description: 'Current time'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.who-to-greet }}

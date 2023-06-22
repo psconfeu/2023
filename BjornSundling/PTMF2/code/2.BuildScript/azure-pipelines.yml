@@ -1,0 +1,70 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+jobs:
+  - job: Build
+    displayName: Build application
+    pool:
+      vmImage: windows-latest
+
+    steps:
+    - checkout: self
+      fetchDepth: 0
+      
+    - task: PowerShell@2
+      displayName: Scan for secrets
+      inputs:
+        targetType: 'inline'
+        script: |
+          Find-Module PSSecretScanner | Install-Module -Force
+          $r = Find-Secret -Path .\
+          if ($r.count -gt 0) {
+            $r
+            throw
+          }
+        failOnStderr: true
+        pwsh: true
+
+    - task: PowerShell@2
+      displayName: Run ScriptAnalyzer
+      inputs:
+        targetType: 'inline'
+        script: 'Invoke-ScriptAnalyzer -Path $(System.DefaultWorkingDirectory) -Recurse -Severity Error -EnableExit'
+        failOnStderr: true
+        pwsh: true
+
+    - task: PowerShell@2
+      displayName: Run Pester tests
+      inputs:
+        targetType: 'inline'
+        script: 'Invoke-Pester -Path $(System.DefaultWorkingDirectory) -CI -Output Detailed'
+        pwsh: true
+        
+    - task: PublishTestResults@2
+      displayName: Publish test results
+      condition: always()
+      inputs:
+        testResultsFormat: 'NUnit'
+        testResultsFiles: '**/test*.xml'
+        failTaskOnFailedTests: true
+
+    - task: PowerShell@2
+      displayName: Build 
+      inputs:
+        targetType: 'inline'
+        script: |
+          Install-Module InvokeBuild -Force
+          invoke-Build -File $(System.DefaultWorkingDirectory)/BasicFunction.Build.ps1
+        failOnStderr: true
+        pwsh: true
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish module to pipeline
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/Bin'
+        artifact: 'Bin'
+        publishLocation: 'pipeline'

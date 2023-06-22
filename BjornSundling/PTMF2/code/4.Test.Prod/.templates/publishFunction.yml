@@ -1,0 +1,25 @@
+parameters:
+  - name: RGName
+    displayName: Resource group name
+  - name: azfunctionName
+    displayName: Azure function name
+  - name: ArchivePath
+    displayName: Azure function zip file path
+
+steps:
+- task: PowerShell@2
+  displayName: 'Publish Azure Function zip'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "$((Get-Date).ToLongTimeString()): Sleeping for two minutes to allow funtion deploy to complete..."
+      Start-Sleep -Seconds 120
+
+      Write-Host "$((Get-Date).ToLongTimeString()): Importing Modules"
+      Get-ChildItem $(System.DefaultWorkingDirectory)/4.Test.Prod/DeploymentModules/ | ForEach-Object {Import-Module $_.FullName -Force}
+
+      Write-Host "$((Get-Date).ToLongTimeString()): publishing webapp"
+      $WebApp = Publish-AzWebapp -ResourceGroupName ${{ parameters.RGName }} -Name ${{ parameters.azfunctionName }} -ArchivePath ${{ parameters.ArchivePath }} -Timeout 300000 -Verbose -Force 
+      Write-Host "##vso[task.setvariable variable=WebAppHostName;]$($WebApp.DefaultHostName)"
+    failOnStderr: true
+    pwsh: true

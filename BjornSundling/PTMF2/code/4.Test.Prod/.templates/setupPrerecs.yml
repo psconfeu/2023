@@ -1,0 +1,30 @@
+steps:
+- task: CmdLine@2
+  condition: or( eq(variables['Agent.OS'], 'Linux'), eq(variables['Agent.OS'], 'Darwin') )
+  displayName: 'Install PowerShell'
+  inputs:
+    script: |
+      sudo apt-get update
+      sudo apt-get install -y wget apt-transport-https software-properties-common
+      wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb"
+      sudo dpkg -i packages-microsoft-prod.deb
+      sudo apt-get update
+      sudo apt-get install -y powershell
+
+- task: CmdLine@2
+  condition: or( eq(variables['Agent.OS'], 'Linux'), eq(variables['Agent.OS'], 'Darwin') )
+  displayName: 'Install Bicep'
+  inputs:
+    script: |
+      curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+      chmod +x ./bicep
+      sudo mv ./bicep /usr/local/bin/bicep
+
+- task: PowerShell@2
+  displayName: Install modules 
+  inputs:
+    targetType: 'inline'
+    script: |
+      Install-Module InvokeBuild, Pester, PSSecretScanner -Force
+    failOnStderr: true
+    pwsh: true

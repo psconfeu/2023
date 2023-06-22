@@ -1,0 +1,20 @@
+name: PSConf2023-GHA
+run-name: ${{ github.actor }} is creating my own GitHub Actions
+on: workflow_dispatch
+jobs:
+  run-GHA-job:
+    runs-on: ubuntu-latest
+    outputs:
+      IconResult: ${{ steps.RepeatFruits.outputs.IconResult }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: bjompen/PSConfEU2023-GHA2@71ad1da999711362568c575d06ebc0119ce61642
+        id: MyAction
+        with:
+          Icons: true
+      - shell: pwsh
+        id: RepeatFruits
+        run: |
+          Write-Output "From env: $($env:IconsOutput)"
+          Write-Output "From ouput: ${{ steps.MyAction.outputs.IconResult }}"
+        
