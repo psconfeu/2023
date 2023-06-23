@@ -1,0 +1,24 @@
+query {
+    myalias: __schema {
+        queryType {
+            fields {
+                name
+                type {
+                    name
+                    ofType {
+                        name
+                    }
+                }
+                args {
+                    name
+                    type {
+                        ofType {
+                            name
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+}

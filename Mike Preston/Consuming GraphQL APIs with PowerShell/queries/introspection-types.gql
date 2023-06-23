@@ -1,0 +1,15 @@
+query {
+    myalias: __schema {
+        types {
+            name
+            fields {
+                name
+                type {
+                    ofType {
+                        name
+                    }
+                }
+            }
+        }
+    }
+}

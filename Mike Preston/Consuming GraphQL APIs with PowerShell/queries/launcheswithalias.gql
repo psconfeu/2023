@@ -1,0 +1,31 @@
+query Launches($limit: Int) {
+  myalias: launches(limit: $limit) {
+    id
+    mission_name
+    mission_id
+    details
+    launch_date_local
+    launch_date_unix
+    launch_date_utc
+    launch_site {
+      site_id
+      site_name
+      site_name_long
+    }
+    rocket {
+      rocket {
+        id
+        name
+        type
+      }
+    }
+    launch_success
+    links {
+      wikipedia
+      video_link
+      reddit_launch
+      reddit_recovery
+      presskit
+    }
+  }
+}
