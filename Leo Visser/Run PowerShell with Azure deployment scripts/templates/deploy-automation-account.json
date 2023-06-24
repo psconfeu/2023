@@ -1,0 +1,69 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "type": "Microsoft.Automation/automationAccounts",
+            "apiVersion": "2021-06-22",
+            "name": "automationaccounttestdemo",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "disableLocalAuth": false,
+                "publicNetworkAccess": true,
+                "sku": {
+                    "name": "Basic"
+                },
+                "encryption": {
+                    "keySource": "Microsoft.Automation",
+                    "identity": {}
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "name": "automationaccount-testdemo-identity",
+            "apiVersion": "2018-11-30",
+            "location": "[resourceGroup().location]"
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid('assign-role')]",
+            "dependsOn": [
+                "automationaccount-testdemo-identity"
+            ],
+            "properties": {
+                "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/f353d9bd-d4a6-484e-a77a-8050b599b867",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', 'automationaccount-testdemo-identity'), '2018-11-30').principalId]"
+            }
+        },
+
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "Deploy-Runbook",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[guid('assign-role')]"
+            ],
+            "kind": "AzurePowerShell",
+            "identity": {
+                "type": "userAssigned",
+                "userAssignedIdentities": {
+                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/automationaccount-testdemo-identity')]" :{}
+                }
+            },
+            "properties": {
+                "forceUpdateTag": "1",
+                "azPowerShellVersion": "6.6",
+                "scriptContent": "param (\r\n[Parameter(Mandatory = $true)]\r\n[string] $SubscriptionId,\r\n\r\n[Parameter(Mandatory = $true)]\r\n[string] $ResourceGroupName,\r\n\r\n[Parameter(Mandatory = $true)]\r\n[string] $AutomationAccountName\r\n)\r\n\r\nGet-AzContext -ListAvailable | Where-Object {$_.Subscription.id -eq $SubscriptionId} | Set-AzContext\r\n'Write-Host \\\"Hello World!\\\"' | Out-File -FilePath '/tmp/script.ps1' -Encoding utf8\r\nImport-AzAutomationRunbook -Path '/tmp/script.ps1' -Name 'runbook1' -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -Type PowerShell -Published -Force",
+                "arguments": "[concat('\" -SubscriptionId \"', subscription().subscriptionId,'\" -resourceGroupName \"', resourceGroup().name, '\" -automationAccountName \"automationaccounttestdemo\"')]",
+                "timeout": "PT1H",
+                "cleanupPreference": "Always",
+                "retentionInterval": "PT1H"
+            }
+
+        }
+    ],
+    "outputs": {}
+}

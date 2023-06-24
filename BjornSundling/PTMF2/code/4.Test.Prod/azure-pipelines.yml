@@ -1,0 +1,246 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+parameters:
+  - name: vstsPackageVersion
+    default: '*'
+
+variables:
+  - name: functionZipName
+    value: myFunc.zip
+  - name: ProductionEnvRG
+    value: PSConf2023-ProdFunc
+  - name: ProductionEnvFunction
+    value: AzFuncProd
+
+resources:
+  repositories:
+    - repository: Code
+      type: git
+      name: PSConf2023-PTMF2/3.GotInfra.Function
+
+stages:
+- stage: CIAndIntTest
+  jobs:
+    - job: CI
+      condition: eq('${{ parameters.vstsPackageVersion }}', '*')
+      displayName: Run CI
+      pool:
+        vmImage: windows-latest
+
+      steps:
+      - checkout: self
+        fetchDepth: 0
+
+      - template: .templates/setupPrerecs.yml
+
+      - task: PowerShell@2
+        displayName: Scan for secrets
+        inputs:
+          targetType: 'inline'
+          script: |
+            Find-Secret -Excludelist $(System.DefaultWorkingDirectory)\.ignoresecrets
+          failOnStderr: true
+          pwsh: true
+
+      - task: PowerShell@2
+        displayName: Run ScriptAnalyzer
+        inputs:
+          targetType: 'inline'
+          script: 'Invoke-ScriptAnalyzer -Path $(System.DefaultWorkingDirectory)/BasicFunction/ -Recurse -Severity Error -EnableExit'
+          failOnStderr: true
+          pwsh: true
+
+      - task: PowerShell@2
+        displayName: Run Pester tests
+        inputs:
+          targetType: 'inline'
+          script: 'Invoke-Pester -Path $(System.DefaultWorkingDirectory)/BasicFunction.Tests.ps1 -CI -Output Detailed'
+          pwsh: true
+          
+      - task: PublishTestResults@2
+        displayName: Publish test results
+        condition: always()
+        inputs:
+          testResultsFormat: 'NUnit'
+          testResultsFiles: '**/test*.xml'
+          failTaskOnFailedTests: true
+
+    - job: buildArtefacts
+      dependsOn: CI
+      condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release'), eq('${{ parameters.vstsPackageVersion }}', '*'))
+      displayName: 'Setup integration tests environment in Azure Function'
+      pool:
+        vmImage: windows-latest
+
+      steps:
+      - checkout: Code
+      - checkout: self
+        fetchDepth: 0
+
+      - template: .templates/setupPrerecs.yml
+
+      - task: PowerShell@2
+        displayName: Build 
+        inputs:
+          targetType: 'inline'
+          script: |
+            invoke-Build -File $(System.DefaultWorkingDirectory)/4.Test.Prod/BasicFunction.Build.ps1
+          failOnStderr: true
+          pwsh: true
+
+      - task: PowerShell@2
+        displayName: 'create function zip'
+        inputs:
+          targetType: 'inline'
+          script: |
+            Copy-Item -Path $(System.DefaultWorkingDirectory)/4.Test.Prod/Bin/* -Destination $(System.DefaultWorkingDirectory)/4.Test.Prod/functionSource/fruitTrigger/ -Recurse
+            $zip = Compress-Archive -Path $(System.DefaultWorkingDirectory)/4.Test.Prod/functionSource/* -DestinationPath $(System.DefaultWorkingDirectory)/4.Test.Prod/${{variables.functionZipName}} -PassThru
+          failOnStderr: true
+          pwsh: true
+
+      - task: PublishPipelineArtifact@1
+        displayName: Publish module to pipeline
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/4.Test.Prod/${{variables.functionZipName}}'
+          artifact: 'Bin'
+          publishLocation: 'pipeline'
+
+    - job: IntTests
+      dependsOn: buildArtefacts
+      condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release'), eq('${{ parameters.vstsPackageVersion }}', '*'))
+      displayName: 'Run integration tests'
+      pool: PSConfEUVMSS
+
+      steps:
+      - checkout: Code
+      - checkout: self
+
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download function from build step'
+        inputs:
+          buildType: 'current'
+          artifactName: 'Bin'
+          targetPath: '$(System.DefaultWorkingDirectory)'
+      
+      - template: .templates/setupPrerecs.yml
+
+      - task: PowerShell@2
+        displayName: 'Create random environment name'
+        inputs:
+          targetType: 'inline'
+          script: |
+            $TempRGName = ((New-Guid).Guid -replace '-')
+            $TempFunctionName = -join ($TempRGName[0..10])
+            Write-Host "##vso[task.setvariable variable=TempRGName;]$TempRGName"
+            Write-Host "##vso[task.setvariable variable=TempFunctionName;]$TempFunctionName"
+          failOnStderr: true
+          pwsh: true
+
+      - template: .templates/deployAzureFunction.yml
+        parameters: 
+          RGName: $(TempRGName)
+          FunctionName: $(TempFunctionName)
+
+      - template: .templates/publishFunction.yml
+        parameters: 
+          RGName: $(RGName)
+          azfunctionName: $(azfunctionName)
+          ArchivePath: $(System.DefaultWorkingDirectory)/${{variables.functionZipName}}
+
+      - task: PowerShell@2
+        displayName: 'run integration tests'
+        inputs:
+          targetType: 'inline'
+          script: |
+            Write-Host "$((Get-Date).ToLongTimeString()): Importing Modules"
+            Get-ChildItem $(System.DefaultWorkingDirectory)/4.Test.Prod/DeploymentModules/ | ForEach-Object {Import-Module $_.FullName -Force}
+
+            Write-Host "$((Get-Date).ToLongTimeString()): Sleeping for two minutes to allow funtion to start..."
+            Start-Sleep -Seconds 120
+
+            Write-Host "$((Get-Date).ToLongTimeString()): Running integration tests on 'https://$(WebAppHostName)/api/fruitTrigger'"
+
+            $PesterConfiguration = New-PesterConfiguration
+            $PesterConfiguration.Output.Verbosity = 'Detailed'
+            $container = New-PesterContainer -Path $(System.DefaultWorkingDirectory)/4.Test.Prod/IntegrationTests.Tests.ps1 -Data @{
+              FunctionUrl = "https://$(WebAppHostName)/api/fruitTrigger"
+            }
+            $PesterConfiguration.Run.Container = $container
+            $PesterConfiguration.TestResult.Enabled = $true
+            Invoke-Pester -Configuration $PesterConfiguration 
+          failOnStderr: true
+          pwsh: true
+    
+      - task: PublishTestResults@2
+        displayName: Publish test results
+        condition: always()
+        inputs:
+          testResultsFormat: 'NUnit'
+          testResultsFiles: '**/test*.xml'
+          failTaskOnFailedTests: true
+    
+      - task: PowerShell@2
+        displayName: 'Remove temporary resources'
+        condition: always()
+        inputs:
+          targetType: 'inline'
+          script: |
+            Write-Host "$((Get-Date).ToLongTimeString()): Importing Modules"
+            Get-ChildItem $(System.DefaultWorkingDirectory)/4.Test.Prod/DeploymentModules/ | ForEach-Object {Import-Module $_.FullName -Force}
+            
+            Write-Host "$((Get-Date).ToLongTimeString()): Removing resources"
+            Remove-AzResourceGroup -Name $(RGName) -Force
+          failOnStderr: true
+          pwsh: true
+
+      - task: UniversalPackages@0
+        inputs:
+          command: 'publish'
+          publishDirectory: '$(System.DefaultWorkingDirectory)/${{variables.functionZipName}}'
+          feedsToUsePublish: 'internal'
+          vstsFeedPublish: '36f940cd-ad42-4a80-9bdb-6a9f4535805e/1b091a33-ff45-43ad-bfdc-81d91af7fd7e'
+          vstsFeedPackagePublish: 'myzippackage'
+          versionOption: 'patch'
+
+- stage: Deployment
+  dependsOn: CIAndIntTest
+  condition: or(and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release')), ne('${{ parameters.vstsPackageVersion }}', '*'))
+  jobs:
+    - deployment: Deploy
+      displayName: 'Publish to production env'
+      pool: PSConfEUVMSS
+      environment: PSConfEUEnvironment
+
+      strategy:
+          runOnce:
+            deploy:
+              steps:
+              - checkout: Code
+              - checkout: self
+              
+              - task: UniversalPackages@0
+                inputs:
+                  command: 'download'
+                  downloadDirectory: '$(System.DefaultWorkingDirectory)'
+                  feedsToUse: 'internal'
+                  vstsFeed: '36f940cd-ad42-4a80-9bdb-6a9f4535805e/1b091a33-ff45-43ad-bfdc-81d91af7fd7e'
+                  vstsFeedPackage: '4ab67bca-fd98-4684-9ae9-71bec6d5ca09'
+                  vstsPackageVersion: ${{ parameters.vstsPackageVersion }}
+
+              - template: .templates/setupPrerecs.yml
+
+              - template: .templates/deployAzureFunction.yml
+                parameters: 
+                  RGName: ${{ variables.ProductionEnvRG }}
+                  FunctionName: ${{ variables.ProductionEnvFunction }}
+
+              - template: .templates/publishFunction.yml
+                parameters: 
+                  RGName: ${{ variables.ProductionEnvRG }}
+                  azfunctionName: "${{ variables.ProductionEnvFunction }}FA"
+                  ArchivePath: $(System.DefaultWorkingDirectory)/${{variables.functionZipName}}

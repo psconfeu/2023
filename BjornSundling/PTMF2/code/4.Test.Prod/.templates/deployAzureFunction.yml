@@ -1,0 +1,35 @@
+parameters:
+  - name: RGName
+    displayName: Resource group name
+  - name: FunctionName
+    displayName: Azure function name
+
+steps:
+- task: PowerShell@2
+  displayName: 'Set up Azure Function'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "$((Get-Date).ToLongTimeString()): Importing Modules"
+      Get-ChildItem $(System.DefaultWorkingDirectory)/4.Test.Prod/DeploymentModules/ | ForEach-Object {Import-Module $_.FullName -Force}
+
+      Write-Host "$((Get-Date).ToLongTimeString()): Connecting to Azure"
+      Connect-AzAccount -Identity
+
+      $RGName = "${{ parameters.RGName }}"
+      Write-Host "$((Get-Date).ToLongTimeString()): Create or verify resource group $RGName"
+      $RG = Get-AzResourceGroup $RGName -ErrorAction SilentlyContinue
+      if ($null -eq $RG) {
+        $RG = New-AzResourceGroup -Name $RGName -Location 'westeurope'
+      }
+
+      Write-Host "$((Get-Date).ToLongTimeString()): Running bicep deploy"
+      $BicepDeploy = New-AzResourceGroupDeployment -Name 'deployAzureFunction' -ResourceGroupName $RGName -TemplateFile $(System.DefaultWorkingDirectory)/3.GotInfra.Function/FunctionBicep/AzureFunction.bicep -TemplateParameterObject @{
+          name = "${{ parameters.FunctionName }}"
+      }
+
+      Write-Host "$((Get-Date).ToLongTimeString()): Set pipeline variables"
+      Write-Host "##vso[task.setvariable variable=azfunctionName;]$($BicepDeploy.Outputs['functionName'].value)"
+      Write-Host "##vso[task.setvariable variable=RGName;]$RGName"
+    failOnStderr: true
+    pwsh: true

@@ -1,0 +1,3 @@
+cd C:\PSCONF\Secrets\SEPH
+seph -Verbose -File "C:\PSCONF\Secrets\02a-simple-script.ps1"
+seph -Verbose -File "C:\PSCONF\Secrets\02b-auth-script.ps1"
