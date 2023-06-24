@@ -1,0 +1,2 @@
+so you can use it for certificate based app registration
+or install it on localmachine/currentuser
