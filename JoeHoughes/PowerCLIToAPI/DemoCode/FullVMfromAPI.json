@@ -1,0 +1,84 @@
+{
+  "boot": {
+    "delay": 0,
+    "enter_setup_mode": false,
+    "retry": false,
+    "retry_delay": 0,
+    "type": "EFI"
+  },
+  "boot_devices": [
+    {
+      "type": "CDROM"
+    }
+  ],
+  "cdroms": [
+    {
+      "allow_guest_control": false,
+      "backing": {
+        "iso_file": "[FlashStack_ISO_ContLib] ISOs/Windows/Server/en-us_windows_server_2022_x64_dvd_620d7eac.iso",
+        "type": "ISO_FILE"
+      },
+      "sata": {
+        "bus": 0,
+        "unit": 0
+      },
+      "start_connected": true,
+      "type": "SATA"
+    }
+  ],
+  "cpu": {
+    "cores_per_socket": 1,
+    "count": 4,
+    "hot_add_enabled": false,
+    "hot_remove_enabled": false
+  },
+  "disks": [
+    {
+      "new_vmdk": {
+        "capacity": 128849018880
+      },
+      "scsi": {
+        "bus": 0,
+        "unit": 0
+      },
+      "type": "SCSI"
+    }
+  ],
+  "guest_OS": "WINDOWS_SERVER_2021",
+  "hardware_version": "VMX_19",
+  "memory": {
+    "hot_add_enabled": false,
+    "size_MiB": 8192
+  },
+  "name": "Test-API-FullDemo2",
+  "nics": [
+    {
+      "allow_guest_control": true,
+      "backing": {
+        "network": "dvportgroup-64",
+        "type": "DISTRIBUTED_PORTGROUP"
+      },
+      "mac_type": "GENERATED",
+      "start_connected": true,
+      "type": "VMXNET3",
+      "upt_compatibility_enabled": true,
+      "wake_on_lan_enabled": true
+    }
+  ],
+  "placement": {
+    "cluster": "domain-c29",
+    "folder": "group-v803142",
+    "datastore": "datastore-59"
+  },
+    "sata_adapters": [
+    {
+      "type": "AHCI"
+    }
+  ],
+  "scsi_adapters": [
+    {
+      "sharing": "NONE",
+      "type": "PVSCSI"
+    }
+  ]
+}
