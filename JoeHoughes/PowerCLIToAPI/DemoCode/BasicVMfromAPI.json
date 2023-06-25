@@ -1,0 +1,9 @@
+{
+  "name": "PowerShell-API-VM_manual",
+  "guest_OS": "DOS",
+  "placement": {
+    "datastore": "datastore-59",
+    "folder": "group-v803142",
+    "cluster": "domain-c29"
+  }
+}
