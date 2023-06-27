@@ -1,7 +1,7 @@
 # PSConfEU 2023 in Prague (June 19-22)
 
 - PSEnigma
-  - [Slides]("PSEnigma/Slides/PSConfEU2023_PSEnigma_ThorstenButz.pdf")
+  - [Slides](PSEnigma/Slides/PSConfEU2023_PSEnigma_ThorstenButz.pdf)
   - [Code](PSEnigma/Code)
 - about_VideoProcessing (Season 2)
   - [Slides](about_VideoProcessing/Slides_Chats/PSConfEU2023_aboutVideoProcessing_ThorstenButz.pdf)
@@ -17,3 +17,4 @@ You find more information about VideoProcessing with PwSh in my 2022 session: [h
 A collection of all my sessions slides, demos etc can by found here: [https://github.com/thorstenbutz/conferences](https://github.com/thorstenbutz/conferences)
 
 My podcast can be found in any podcatcher or on the website: [https://www.slidingwindows.de](https://www.slidingwindows.de)
+
