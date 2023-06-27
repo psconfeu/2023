@@ -1,0 +1,45 @@
+# for build 19041 or later. Must restart WSL2 to take effect (ex. wsl --shutdown)
+[wsl2]
+# Allow for KVM VMs in WSL instance (default=true) (W11 build 19619 or later)
+#nestedVirtualization=false
+#
+# An absolute Windows path to a custom Linux kernel.
+#kernel=C:\\Users\\mike\\bzImage
+#
+# Additional kernel command line arguments.
+#kernelCommandLine=
+#
+# How much memory to assign to the WSL2 VM. 50% of total memory or 8GB, whichever is less. On early builds (pre 20175, 80% of total memory)
+memory=8GB
+#
+# How many processors to assign to the WSL2 VM.
+processors=2
+#
+# How much swap space to add to the WSL2 VM. 0 for no swap file.
+#swap=
+#
+# An absolute Windows path to the swap vhd.
+#swapFile=
+#
+# Boolean specifying if ports bound to wildcard or localhost in the WSL2 VM should be connectable from the #host via localhost:port (default true).
+localhostForwarding=true
+#
+# Boolean to turn on or off support for GUI applications (WSLg) in WSL. Only available for Windows 11 (default true)
+#guiApplications=false
+#
+# Default true setting enables Windows to reclaim unused memory allocated to WSL 2 virtual machine.
+#pageReporting=true
+#
+# Boolean to turn on an output console Window that shows the contents of dmesg upon start of a WSL 2 distro instance. Only available for Windows 11.
+debugConsole=false
+#
+# The number of milliseconds that a VM is idle, before it is shut down. Only available for Windows 11.
+#vmIdleTimeout=6000
+#
+[experimental]
+# Memory reclamation idle detection, drop_caches. Only available for Windows 11.
+autoMemoryReclaim=true
+#
+# Entries must be absolute Windows paths with escaped backslashes, for example C:\\Users\\mike\\kernel
+# Entries must be size followed by unit, for example 8GB or 512MB
+# Ensure no whitespace between "=" and value

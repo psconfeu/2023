@@ -1,0 +1,94 @@
+Terminal
+	Pane read-only mode
+	Export text
+	Open system menu
+	restart connection
+	show context menu
+
+WSL in Windows Store - must specify via wsl --install --enable-wsl1 switch to get wslv1
+
+Update WSL: wsl --update --web-download
+
+.wslconfig
+	[experimental]
+	autoMemoryReclaim=true
+
+	/etc/wsl.conf
+	Now able to add startup commands to launch with
+		[boot]
+		command="service ssh start"
+
+wsl.exe commands
+	wsl --debug-shell
+	wsl --system - opens Mariner utility container image
+		cat /etc/lsb-release
+
+hcsdiag.exe:
+	hcsdiag list
+
+	HCS - Host Compute Service
+    		low level API for virtualized Windows containers
+    		could have used PoSH or WMI, but too many limitations at that level
+    		Easy to make Host Windows container or Hyper-V container
+
+		Types:
+		"Name","Description"
+		"CmService","Not sure, possibly a base image that other containers are derived from"
+		"VMMS","A virtual machine running in Hyper-V using Virtual Machine Management Service"
+		"Madrid","The Windows Sandbox VM"
+		"HVSI","The WDAG/MDAG VM (originally code named 'Barcelona' inside Microsoft)"
+		"HVSI_DPSContainer","The VM powering MDAG for Office"
+		"WSL","A Windows Subsystem for Linux container"
+
+
+also HNS (Host Network Services) and GCS (Guest Compute Services) services
+	hnsdiag list all
+
+Managing WSL
+	WSL Manager beta
+	Show GWSL
+
+Graphics -
+	Run Blender demo
+	Show xWSL & Kali - compare to Kali WinKex
+
+
+
+Create backups of ~
+rsync --archive --verbose --delete /home/mike/ /c/wsl-backups/Ubuntu-2204/
+
+WSL Links:
+
+https://docs.microsoft.com/en-us/windows/wsl/faq
+https://patrickwu.space/
+https://www.how2shout.com/how-to/how-to-install-nextcloud-on-ubuntu-20-04-lts-wsl-windows-10.html
+https://github.com/sakai135/wsl-vpnkit
+https://patrickwu.space/2019/02/16/hyper-v-hvc-command/
+https://patrickwu.space/2021/06/03/build-2021/
+https://patrickwu.space/tags/WSL2/
+https://patrickwu.space/wslconf/index.html
+https://patrickwu.space/2016/07/13/wsl-ubuntu-desktop-on-windows/
+https://patrickwu.space/2020/02/14/wsl-on-mac/
+https://ubuntu.com/tutorials/install-ubuntu-on-wsl2-on-windows-11-with-gui-support#5-install-and-use-a-gui-package
+https://freshman.tech/windows-terminal-guide/
+https://www.kali.org/docs/wsl/win-kex/
+https://github.com/SvenGroot/WslManagementPS
+https://windowsterminalthemes.dev/
+https://techcommunity.microsoft.com/t5/itops-talk-blog/using-wsl-2-on-windows-server-2022-to-run-linux-containers/ba-p/3624745
+https://diddledani.com/wsl2-on-server-2022/
+https://www.androidpolice.com/set-up-wsa-windows-11-android-apps/
+https://www.phoronix.com/news/Microsoft-WSL-systemd
+https://ubuntu.com//blog/ubuntu-wsl-enable-systemd
+https://ubuntu.com/tutorials/run-dotnet-echo-bot-with-systemd-on-ubuntu-wsl#1-overview
+https://snapcraft.io/
+https://microk8s.io/docs/getting-started
+https://github.com/craigloewen-msft/microk8sdemo
+https://www.youtube.com/watch?v=DmfuJzX6vJQ
+https://ubuntu.com/wsl
+https://devblogs.microsoft.com/commandline/tag/wsl/
+https://github.com/microsoft/WSL
+https://www.kali.org/docs/wsl/win-kex/
+https://github.com/wslutilities/wslu
+https://wslguy.net/
+https://wsl.dev/
+https://www.cloudwithchris.com/blog/go-dev-environment-vscode-wsl/
