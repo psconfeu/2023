@@ -1,0 +1,5 @@
+<Configuration>
+  <LogonCommand>
+    <Command>cmd.exe /C "cd C:\Users\WDAGUtilityAccount\Desktop\ &#038;&#038; mkdir PolarProxy &#038;&#038; curl -L https://www.netresec.com/?download=PolarProxy_win-x64 -o %TEMP%\pp.zip &#038;&#038; tar -C PolarProxy -xf %TEMP%\pp.zip &#038;&#038; curl -L https://www.netresec.com/?download=NetworkMiner -o %TEMP%\nm.zip &#038;&#038; tar -xf %TEMP%\nm.zip &#038;&#038; curl -L https://download.visualstudio.microsoft.com/download/pr/df4372ca-82c8-4bfa-acf9-c49e27279e7e/6bddefd26964017ff520dc1443029e04/dotnet-runtime-6.0.1-win-x64.exe -o %TEMP%\dotnet-runtime.exe &#038;&#038; %TEMP%\dotnet-runtime.exe /install /quiet /norestart"</Command>
+  </LogonCommand>
+</Configuration>
