@@ -1,0 +1,1 @@
+## Terminal and WSL session
