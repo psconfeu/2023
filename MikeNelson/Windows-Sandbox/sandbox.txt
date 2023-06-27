@@ -1,0 +1,106 @@
+sandbox
+
+    why use it
+        obvious - ransomware, malware, virus, bad apps
+        not so obvious - e-learning, softare testing and QA, UX design, reverse engineering, alpha/beta/bad apps
+
+.wsb file
+    ram, vGPU, shared folders, etc
+        vGPU enabled by default, but "may" be a security concern - huh?
+
+**** Show Sandbox editor online and local
+    Sandbox editors (maybe malware) - also online versions https://leestevetk.github.io/WSBEditor/WSBEditor-Latest.html
+    start scoopbox app
+
+
+**** Show sample .cmd file
+.cmd file
+    powershell, batch, vbs, msi, exe... even python
+
+**** Talk about hcsdiag
+    hcsdiag list
+
+Start a sandbox
+
+    hcsdiag list
+
+HCS - Host Compute Service
+    low level API for virtualized Windows containers
+    could have used PoSH or WMI, but too many limitations at that level
+    Easy to make Host Windows container or Hyper-V container
+    also HNS (Host Network Services) and GCS (Guest Compute Services) services
+    hcsdiag.exe list
+    Types:
+    "Name","Description"
+"CmService","Not sure, possibly a base image that other containers are derived from"
+"VMMS","A virtual machine running in Hyper-V using Virtual Machine Management Service"
+"Madrid","The Windows Sandbox VM"
+"HVSI","The WDAG/MDAG VM (originally code named 'Barcelona' inside Microsoft)"
+"HVSI_DPSContainer","The VM powering MDAG for Office"
+"WSL","A Windows Subsystem for Linux container"
+
+**** Start a sandbox1
+    User account - WDAGUtilityAccount??
+        WDAG... MDAG....
+
+**** Create a file in root, reboot, show file still exists
+persistent data now available in 22H2 - restart, not shutdown
+
+**** Show right-click context menu
+right-click context menu - github repo
+
+**** Try to start more than one instance
+More than one instance - mutex find
+
+**** Show wsbdetect
+wsbdetect utility - what purpose?
+
+**** Start Torsandbox
+
+**** PowerShell modules & parameter .ps1
+PowerShell module - sandbox - Thomas Illiet (no real help, last updated 2019, no repo)
+**** Open wsb_with_params.ps1
+
+**** Show get-command -module windowssandboxtools
+PowerShell module - windowssandboxtools - Jeff Hicks
+    -windowsize option, which is cool
+    -insert metadata into the .wsb file - show vscode.wsb
+
+**** Show demo.wsb and demo-config.ps1 file from Jeff
+
+
+**** If time, run polar proxy demo
+
+**** Links:
+https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools
+https://github.com/microsoft/Windows-Sandbox-Utilities
+https://github.com/thesecretclub/SandboxBootkit
+https://github.com/karkason/pywinsandbox
+https://github.com/microsoft/SandboxSecurityTools
+https://github.com/LloydLabs/wsb-detect
+https://github.com/damienvanrobaeys/Windows_Sandbox_Editor
+https://github.com/Souhardya/Slavyana
+https://github.com/MojtabaTajik/WSBBuilder
+https://github.com/jdhitsolutions/WindowsSandboxTools
+https://github.com/hasan-hasanov/ScoopBox
+https://github.com/redcode-labs/RedSand
+https://github.com/damienvanrobaeys/WindowsSandbox_Explorer
+https://github.com/peasead/windows-sandbox-to-elastic
+https://github.com/LAB02-Research/ScoopBoxManager
+https://github.com/BanterBoy/Windows-Sandbox
+https://github.com/csatswo/Sandbox-M365
+https://github.com/hasan-hasanov/Boxer
+https://github.com/flexxxxer/WindowsSandbox-ConfigsAndScripts
+https://github.com/TheTaylorLee/SandboxToolkit
+https://github.com/damienvanrobaeys/Run-application-in-Windows-Sandbox-from-Intune
+https://github.com/TomasHubelbauer/ps-remoting
+https://github.com/9gits/cyberghost-account-generator
+https://github.com/reuteras/dfirws
+https://github.com/LogicReinc/LogicReinc.WindowsSandbox
+https://github.com/QAInsights/Windows-Sandbox-Scripts
+https://github.com/lukecdavidson/sandbox
+https://github.com/JohnyWS/windows-sandbox-for-company-vpn
+https://github.com/Unicorn-OS/Windows-Sandbox
+https://github.com/Dvd-Znf/TorSandbox
+https://github.com/jleivo/windows_sandboxes
+

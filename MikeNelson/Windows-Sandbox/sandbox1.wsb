@@ -1,0 +1,26 @@
+<Configuration>
+<!-- Setup for all defaults. See the MS Docs page for options and values -->
+  <vGPU>disable</vGPU>
+  <Networking>Default</Networking>
+  <AudioInput>Default</AudioInput>
+  <VideoInput>Defualt</VideoInput>
+  <ProtectedClient>Default</ProtectedClient>
+  <PrinterRedirection>Default</PrinterRedirection>
+  <ClipboardRedirection>Default</ClipboardRedirection>
+  <MemoryInMB>8192</MemoryInMB>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>D:\github\mikenelson-io\pure_scripts</HostFolder>
+      <SandboxFolder>C:\scripts</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>C:\sandbox</HostFolder>
+      <SandboxFolder>C:\sandbox</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>c:\sandbox\startup.cmd</Command>
+  </LogonCommand>
+</Configuration>
